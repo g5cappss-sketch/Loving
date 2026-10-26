@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gửi Ngô Bích Hữu ✨ Một điều nhỏ dành riêng cho cậu</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts hỗ trợ tiếng Việt mượt mà, thanh lịch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        :root {
+            --bg-top: #fff9fb;
+            --bg-mid: #fce8ef;
+            --bg-bottom: #f7d4e0;
+            --text-primary: #59333e;
+            --text-secondary: #875866;
+            --accent-rose: #e37b96;
+            --accent-deep: #c95976;
+            --accent-gold: #dfb47c;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background: linear-gradient(165deg, var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bottom) 100%);
+            color: var(--text-primary);
+        }
+
+        .font-serif-display {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        /* Canvas 3D toàn màn hình */
+        #webgl-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: grab;
+        }
+        #webgl-container:active {
+            cursor: grabbing;
+        }
+
+        /* Lớp phủ hạt sáng mịn & ánh sáng viền */
+        .ambient-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: 
+                radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.7) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(244, 162, 184, 0.25) 0%, transparent 50%);
+        }
+
+        /* Glassmorphism Card cao cấp, không sến */
+        .glass-panel {
+            background: rgba(255, 251, 253, 0.72);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 
+                0 20px 50px rgba(156, 88, 108, 0.12),
+                0 4px 16px rgba(156, 88, 108, 0.06),
+                inset 0 1px 1px rgba(255, 255, 255, 0.9);
+        }
+
+        .glass-pill {
+            background: rgba(255, 252, 253, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 24px rgba(163, 94, 114, 0.1);
+        }
+
+        /* Nút bấm chính tinh tế */
+        .btn-primary-pastel {
+            background: linear-gradient(135deg, #e8839e 0%, #d46583 100%);
+            color: #ffffff;
+            box-shadow: 
+                0 10px 25px -5px rgba(212, 101, 131, 0.45),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .btn-primary-pastel:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 
+                0 14px 30px -5px rgba(212, 101, 131, 0.55),
+                inset 0 1px 2px rgba(255, 255, 255, 0.5);
+        }
+        .btn-primary-pastel:active {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        /* Nút phụ nhẹ nhàng */
+        .btn-secondary-pastel {
+            background: rgba(255, 255, 255, 0.75);
+            color: #7d4e5b;
+            border: 1px solid rgba(227, 123, 150, 0.35);
+            box-shadow: 0 4px 12px rgba(156, 88, 108, 0.06);
+            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .btn-secondary-pastel:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(227, 123, 150, 0.6);
+        }
+
+        /* Hiệu ứng gợn sóng cho nút nhấn giữ ở Bước 3 */
+        @keyframes pulseRing {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            70% { transform: scale(1.35); opacity: 0; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+        .pulse-ring::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 9999px;
+            border: 2px solid #e37b96;
+            animation: pulseRing 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+            pointer-events: none;
+        }
+
+        /* Thanh tiến trình bước */
+        .step-dot {
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .step-dot.active {
+            width: 28px;
+            background: linear-gradient(90deg, #e8839e, #d46583);
+        }
+
+        /* Chữ shimmer nhẹ nhàng */
+        .text-gradient-rose {
+            background: linear-gradient(135deg, #6e3847 0%, #c45472 55%, #b57c4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Tooltip nhỏ khi chạm vào vật thể 3D */
+        #floating-hint {
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+    </style>
+</head>
+<body class="relative select-none">
+
+    <!-- Canvas 3D -->
+    <div id="webgl-container" aria-label="Không gian 3D tương tác"></div>
+    <div class="ambient-glow"></div>
+
+    <!-- Thanh điều hướng phía trên -->
+    <header class="fixed top-0 left-0 right-0 z-20 px-4 pt-4 pb-2 sm:px-8 sm:pt-6 flex items-center justify-between pointer-events-none">
+        <!-- Badge tên chương / thông điệp nhỏ -->
+        <div class="glass-pill px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2.5 pointer-events-auto">
+            <span class="w-2 h-2 rounded-full bg-[#e37b96] animate-pulse"></span>
+            <span id="chapter-badge" class="text-xs sm:text-sm font-medium tracking-wide text-[#6b424e]">
+                Chương 01 · Lời chào dịu dàng
+            </span>
+        </div>
+
+        <!-- Cụm nút điều khiển: Chỉ báo bước & Âm thanh -->
+        <div class="flex items-center gap-2.5 pointer-events-auto">
+            <!-- Dots tiến trình -->
+            <div class="glass-pill px-3 py-2 rounded-full flex items-center gap-1.5" aria-label="Tiến trình câu chuyện">
+                <span class="step-dot active h-2 w-2 rounded-full bg-[#e37b96]/40" data-dot="0"></span>
+                <span class="step-dot h-2 w-2 rounded-full bg-[#e37b96]/35" data-dot="1"></span>
+                <span class="step-dot h-2 w-2 rounded-full bg-[#e37b96]/35" data-dot="2"></span>
+                <span class="step-dot h-2 w-2 rounded-full bg-[#e37b96]/35" data-dot="3"></span>
+            </div>
+
+            <!-- Nút bật/tắt nhạc Music Box -->
+            <button id="audio-toggle-btn" 
+                class="glass-pill w-10 h-10 rounded-full flex items-center justify-center text-[#6b424e] hover:text-[#c95976] transition-transform active:scale-90"
+                title="Bật/Tắt giai điệu Music Box">
+                <!-- Icon Loa tắt / bật -->
+                <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+                <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 hidden text-[#d46583]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Gợi ý tương tác 3D nhỏ ở giữa màn hình phía trên card -->
+    <div id="floating-hint" class="fixed top-[14%] sm:top-[16%] left-1/2 -translate-x-1/2 z-10 pointer-events-none opacity-90">
+        <div class="px-3.5 py-1 rounded-full bg-white/50 backdrop-blur-md border border-white/70 text-[11px] sm:text-xs text-[#7d525e] tracking-wide flex items-center gap-1.5 shadow-sm">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#e37b96]"></span>
+            <span id="hint-text">Chạm vào vật thể 3D hoặc xoay nhẹ không gian ✨</span>
+        </div>
+    </div>
+
+    <!-- Khu vực Card kể chuyện ở phần dưới màn hình (Dành trọn phần trên cho 3D) -->
+    <main class="fixed bottom-0 left-0 right-0 z-20 p-3.5 sm:p-6 md:pb-8 flex flex-col items-center justify-end pointer-events-none">
+        
+        <!-- Card nội dung chính -->
+        <section id="story-card" class="glass-panel w-full max-w-lg rounded-3xl p-5 sm:p-7 pointer-events-auto transition-all duration-500 relative overflow-hidden">
+            
+            <!-- Ánh sáng trang trí góc card -->
+            <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-gradient-to-br from-[#f9c5d5]/40 to-transparent blur-xl pointer-events-none"></div>
+
+            <!-- STEP 0: Lời chào mở đầu -->
+            <div id="step-content-0" class="step-pane flex flex-col items-center text-center">
+                <span class="text-[11px] uppercase tracking-[0.2em] text-[#a66c7c] font-semibold mb-1.5">
+                    Gửi người đặc biệt
+                </span>
+                <h1 class="font-serif-display text-2xl sm:text-3xl font-bold text-[#522d38] mb-2.5 leading-snug">
+                    Chào cậu, Ngô Bích Hữu ✨
+                </h1>
+                <p class="text-sm sm:text-[15px] text-[#6e4652] leading-relaxed mb-5 max-w-md">
+                    Hôm nay bầu trời dịu dàng lắm, tớ có gói một chút nắng ấm và vài điều nhỏ xíu vào không gian này. Cậu nán lại đây với tớ một chút nhé?
+                </p>
+                <button onclick="goToStep(1)" class="btn-primary-pastel px-7 py-3 sm:py-3.5 rounded-2xl font-medium text-sm sm:text-[15px] flex items-center gap-2.5 group">
+                    <span>Mở bức thư nhỏ</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- STEP 1: Những điều nhỏ bé -->
+            <div id="step-content-1" class="step-pane hidden flex-col items-center text-center">
+                <span class="text-[11px] uppercase tracking-[0.2em] text-[#a66c7c] font-semibold mb-1.5">
+                    Những khoảnh khắc dịu êm
+                </span>
+                <h2 class="font-serif-display text-xl sm:text-2xl font-bold text-[#522d38] mb-2.5 leading-snug">
+                    Điều làm ngày thường hóa đặc biệt
+                </h2>
+                <p class="text-sm sm:text-[15px] text-[#6e4652] leading-relaxed mb-5 max-w-md">
+                    Cậu có biết không? Giữa hàng ngàn điều bình thường mỗi ngày, nụ cười và sự xuất hiện của <span class="font-semibold text-[#b8526e]">Bích Hữu</span> luôn làm mọi thứ xung quanh trở nên ấm áp và rạng rỡ hơn hẳn.
+                </p>
+                <div class="flex items-center gap-3">
+                    <button onclick="goToStep(0)" class="btn-secondary-pastel px-4 py-3 rounded-2xl text-xs sm:text-sm font-medium">
+                        Quay lại
+                    </button>
+                    <button onclick="goToStep(2)" class="btn-primary-pastel px-6 py-3 sm:py-3.5 rounded-2xl font-medium text-sm sm:text-[15px] flex items-center gap-2 group">
+                        <span>Đi tiếp cùng tớ nhé</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Tương tác Nhấn & Giữ để kết nối 2 quỹ đạo -->
+            <div id="step-content-2" class="step-pane hidden flex-col items-center text-center">
+                <span class="text-[11px] uppercase tracking-[0.2em] text-[#a66c7c] font-semibold mb-1.5">
+                    Bí mật nhỏ cất giữ
+                </span>
+                <h2 class="font-serif-display text-xl sm:text-2xl font-bold text-[#522d38] mb-2 leading-snug">
+                    Khi hai quỹ đạo chạm nhau
+                </h2>
+                <p class="text-sm sm:text-[15px] text-[#6e4652] leading-relaxed mb-4 max-w-md">
+                    Có một điều tớ đã cất giữ từ lâu, hôm nay lấy hết can đảm gửi vào thế giới nhỏ này. Cậu hãy <span class="font-semibold text-[#c45472]">nhấn giữ nút bên dưới</span> để đưa hai vì sao lại gần nhau nhé!
+                </p>
+
+                <!-- Nút nhấn giữ tương tác (Hold / Tap) -->
+                <div class="flex flex-col items-center gap-2.5 my-1">
+                    <div class="relative flex items-center justify-center">
+                        <!-- Vòng tròn SVG hiển thị phần trăm -->
+                        <svg class="w-20 h-20 -rotate-90 transform" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r="34" stroke="rgba(227, 123, 150, 0.22)" stroke-width="5" fill="transparent" />
+                            <circle id="hold-progress-ring" cx="40" cy="40" r="34" stroke="#d46583" stroke-width="5" stroke-linecap="round" fill="transparent"
+                                stroke-dasharray="213.6" stroke-dashoffset="213.6" />
+                        </svg>
+                        <button id="hold-unlock-btn"
+                            class="pulse-ring absolute w-14 h-14 rounded-full btn-primary-pastel flex items-center justify-center shadow-lg focus:outline-none"
+                            aria-label="Nhấn giữ để mở khóa bí mật">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <span id="hold-status-text" class="text-xs font-medium text-[#915b69]">
+                        Nhấn giữ hoặc chạm liên tiếp (0%)
+                    </span>
+                </div>
+            </div>
+
+            <!-- STEP 3: Lời tỏ tình chính thức (Climax) -->
+            <div id="step-content-3" class="step-pane hidden flex-col items-center text-center">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fce4ec] text-[#b84d69] text-[11px] font-semibold tracking-wider uppercase mb-2">
+                    <span>✨ Lời từ trái tim ✨</span>
+                </div>
+                <h1 class="font-serif-display text-2xl sm:text-3xl md:text-[32px] font-bold text-gradient-rose mb-2.5 leading-tight">
+                    Anh thích em, Ngô Bích Hữu
+                </h1>
+                <p class="text-sm sm:text-[15px] text-[#69414c] leading-relaxed mb-5 max-w-md">
+                    Không phải là những lời hoa mỹ nhất, chỉ là tình cảm chân thành và dịu dàng nhất mà anh luôn dành trọn cho em. Cho phép anh được ở bên cạnh quan tâm và thương em mỗi ngày, làm người yêu anh nhé?
+                </p>
+
+                <!-- Cụm 2 nút Tỏ tình -->
+                <div id="confession-buttons-wrap" class="relative w-full flex flex-wrap items-center justify-center gap-3 min-h-[52px]">
+                    <button id="btn-accept-love" onclick="acceptConfession()" 
+                        class="btn-primary-pastel px-7 py-3.5 rounded-2xl font-semibold text-sm sm:text-base flex items-center gap-2 shadow-xl z-10">
+                        <span>Em đồng ý 💗</span>
+                    </button>
+
+                    <button id="btn-shy-dodge" 
+                        class="btn-secondary-pastel px-5 py-3 rounded-2xl font-medium text-xs sm:text-sm text-[#7d4e5b] relative z-10">
+                        Để suy nghĩ thêm...
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Màn hình Kỷ niệm / Đồng ý (Celebration) -->
+            <div id="step-content-4" class="step-pane hidden flex-col items-center text-center">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#f9d5e0] to-[#fceef2] flex items-center justify-center mb-2 shadow-inner border border-white">
+                    <span class="text-xl">🌷</span>
+                </div>
+                <span class="text-[11px] uppercase tracking-[0.2em] text-[#b8526e] font-semibold mb-1">
+                    Từ hôm nay & mãi về sau
+                </span>
+                <h2 class="font-serif-display text-2xl sm:text-3xl font-bold text-gradient-rose mb-2">
+                    Cảm ơn em vì đã đến bên anh!
+                </h2>
+                <p class="text-sm sm:text-[15px] text-[#69414c] leading-relaxed mb-4 max-w-md">
+                    Vậy là từ giây phút này, thế giới của anh chính thức có thêm <span class="font-semibold text-[#c45472]">Ngô Bích Hữu</span>. Mình cùng nhau viết nên thật nhiều kỷ niệm đẹp và bình yên nhé!
+                </p>
+
+                <!-- Thẻ lưu niệm nhỏ -->
+                <div class="w-full bg-white/60 border border-white/90 rounded-2xl p-3.5 mb-4 flex items-center justify-between text-left shadow-sm">
+                    <div>
+                        <p class="text-[11px] text-[#996573] uppercase tracking-wider font-medium">Chứng nhận ngọt ngào</p>
+                        <p class="text-xs sm:text-sm font-semibold text-[#59333e] mt-0.5">Anh & Ngô Bích Hữu · Ngày đặc biệt 💗</p>
+                    </div>
+                    <button onclick="triggerHeartBurst()" class="px-3 py-1.5 rounded-xl bg-[#fce4ec] hover:bg-[#f8bbd0] text-[#b84d69] text-xs font-medium transition-colors">
+                        Thả tim ✨
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleMinimizedUI()" class="btn-secondary-pastel px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium">
+                        Ngắm không gian 3D
+                    </button>
+                    <button onclick="goToStep(0)" class="text-xs sm:text-sm text-[#996573] hover:text-[#59333e] underline underline-offset-4 px-2 py-2">
+                        Xem lại từ đầu
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Nút hiện lại hộp thoại khi đang ở chế độ ngắm 3D toàn màn hình -->
+        <button id="restore-ui-btn" onclick="toggleMinimizedUI()" 
+            class="hidden glass-pill px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium text-[#59333e] items-center gap-2 pointer-events-auto shadow-lg hover:scale-105 transition-transform">
+            <span>Hiện lại lời nhắn 💌</span>
+        </button>
+    </main>
+
+    <script>
+        /**
+         * ============================================================================
+         * 1. HỆ THỐNG ÂM THANH MUSIC BOX & HIỆU ỨNG (WEB AUDIO API - KHÔNG CẦN FILE NGOÀI)
+         * ============================================================================
+         */
+        class PastelMusicBox {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.melodyTimer = null;
+                this.noteIndex = 0;
+                // Giai điệu hợp âm ngọt ngào, nhẹ nhàng kiểu Music Box (Fmaj7 - G6 - Em7 - Am7)
+                this.melodyNotes = [
+                    523.25, 659.25, 783.99, 987.77, // C5, E5, G5, B5
+                    587.33, 783.99, 880.00, 1046.50, // D5, G5, A5, C6
+                    659.25, 783.99, 987.77, 1174.66, // E5, G5, B5, D6
+                    523.25, 659.25, 880.00, 783.99   // C5, E5, A5, G5
+                ];
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            // Phát một nốt chuông music box ấm áp
+            playChime(freq, duration = 1.8, volume = 0.065) {
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const osc2 = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc2.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+                    osc2.frequency.setValueAtTime(freq * 2, now); // Họa âm bậc cao nhẹ
+
+                    gain.gain.setValueAtTime(0.0001, now);
+                    gain.gain.linearRampToValueAtTime(volume, now + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                    const subGain = this.ctx.createGain();
+                    subGain.gain.value = 0.12;
+
+                    osc.connect(gain);
+                    osc2.connect(subGain);
+                    subGain.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc2.start(now);
+                    osc.stop(now + duration);
+                    osc2.stop(now + duration);
+                } catch (e) {
+                    // Bỏ qua nếu trình duyệt chặn tự động phát
+                }
+            }
+
+            // Hiệu ứng âm thanh khi bấm nút hoặc tương tác
+            playSparkleSfx(type = 'soft') {
+                this.init();
+                if (type === 'soft') {
+                    this.playChime(659.25, 0.7, 0.05);
+                    setTimeout(() => this.playChime(880.00, 0.9, 0.05), 90);
+                } else if (type === 'celebrate') {
+                    const chord = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                    chord.forEach((f, idx) => {
+                        setTimeout(() => this.playChime(f, 2.2, 0.06), idx * 95);
+                    });
+                } else if (type === 'dodge') {
+                    this.playChime(587.33, 0.4, 0.04);
+                }
+            }
+
+            toggleBackgroundMusic() {
+                this.init();
+                this.isPlaying = !this.isPlaying;
+                const iconOn = document.getElementById('icon-sound-on');
+                const iconOff = document.getElementById('icon-sound-off');
+
+                if (this.isPlaying) {
+                    iconOn.classList.remove('hidden');
+                    iconOff.classList.add('hidden');
+                    this.startLoop();
+                } else {
+                    iconOn.classList.add('hidden');
+                    iconOff.classList.remove('hidden');
+                    this.stopLoop();
+                }
+            }
+
+            startLoop() {
+                if (this.melodyTimer) clearInterval(this.melodyTimer);
+                this.playChime(this.melodyNotes[this.noteIndex], 2.0, 0.045);
+                this.melodyTimer = setInterval(() => {
+                    if (!this.isPlaying) return;
+                    this.noteIndex = (this.noteIndex + 1) % this.melodyNotes.length;
+                    this.playChime(this.melodyNotes[this.noteIndex], 2.1, 0.045);
+                }, 680);
+            }
+
+            stopLoop() {
+                if (this.melodyTimer) {
+                    clearInterval(this.melodyTimer);
+                    this.melodyTimer = null;
+                }
+            }
+        }
+
+        const soundBox = new PastelMusicBox();
+        document.getElementById('audio-toggle-btn').addEventListener('click', () => {
+            soundBox.toggleBackgroundMusic();
+        });
+
+        /**
+         * ============================================================================
+         * 2. KHỞI TẠO KHÔNG GIAN 3D THREE.JS (PASTEL DREAMY WORLD)
+         * ============================================================================
+         */
+        const container = document.getElementById('webgl-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0xfce8ef, 0.022);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 150);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+        container.appendChild(renderer.domElement);
+
+        // Hệ thống ánh sáng dịu ngọt kiểu Clay / Frosted Porcelain
+        const ambientLight = new THREE.AmbientLight(0xfff5f8, 0.85);
+        scene.add(ambientLight);
+
+        const hemiLight = new THREE.HemisphereLight(0xfffBFD, 0xf3c6d3, 0.65);
+        hemiLight.position.set(0, 25, 0);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xfff8f0, 0.9);
+        dirLight.position.set(12, 22, 16);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
+
+        const pointLightRose = new THREE.PointLight(0xff9eb8, 1.1, 30);
+        pointLightRose.position.set(0, 4, 4);
+        scene.add(pointLightRose);
+
+        // Bộ chất liệu Pastel chủ đạo (Không neon, rất mịn màng)
+        const materials = {
+            blushClay: new THREE.MeshStandardMaterial({
+                color: 0xf7b9c9,
+                roughness: 0.42,
+                metalness: 0.05
+            }),
+            rosePorcelain: new THREE.MeshPhysicalMaterial({
+                color: 0xe87a96,
+                roughness: 0.22,
+                metalness: 0.05,
+                clearcoat: 0.7,
+                clearcoatRoughness: 0.18
+            }),
+            deepHeartCrystal: new THREE.MeshPhysicalMaterial({
+                color: 0xe36486,
+                emissive: 0x4a1222,
+                emissiveIntensity: 0.2,
+                roughness: 0.15,
+                metalness: 0.08,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
+                reflectivity: 0.9
+            }),
+            warmCream: new THREE.MeshStandardMaterial({
+                color: 0xfff8f3,
+                roughness: 0.35,
+                metalness: 0.02
+            }),
+            champagneGold: new THREE.MeshStandardMaterial({
+                color: 0xe6c187,
+                roughness: 0.25,
+                metalness: 0.65
+            }),
+            cloudSoft: new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                roughness: 0.7,
+                metalness: 0.0,
+                transparent: true,
+                opacity: 0.92
+            }),
+            leafSage: new THREE.MeshStandardMaterial({
+                color: 0xa8d1bf,
+                roughness: 0.5,
+                metalness: 0.05
+            })
+        };
+
+        /**
+         * ============================================================================
+         * 3. XÂY DỰNG 4 CỤM ĐẢO 3D THEO TỪNG CHƯƠNG TRUYỆN
+         * ============================================================================
+         */
+        const stationCoords = [
+            new THREE.Vector3(0, 0, 0),       // Bước 0: Bức thư & Đảo mây mở đầu
+            new THREE.Vector3(16, 1.5, -10),  // Bước 1: Khu vườn Hoa & Khung ảnh kỷ niệm
+            new THREE.Vector3(4, 3.0, -24),   // Bước 2: Hai hành tinh nhỏ xoay quanh nhau
+            new THREE.Vector3(-12, 4.0, -14)  // Bước 3 & 4: Trái tim pha lê hồng trung tâm
+        ];
+
+        const interactableRoots = [];
+
+        // Hàm tạo đám mây bông xốp đáng yêu
+        function createFluffyCloud(scale = 1) {
+            const cloudGroup = new THREE.Group();
+            const sphereGeo = new THREE.SphereGeometry(1, 24, 24);
+            const parts = [
+                { x: 0, y: 0, z: 0, s: 1.1 },
+                { x: 0.95, y: -0.1, z: 0.15, s: 0.85 },
+                { x: -0.95, y: -0.12, z: -0.1, s: 0.8 },
+                { x: 0.4, y: 0.45, z: -0.2, s: 0.75 },
+                { x: -0.4, y: 0.35, z: 0.25, s: 0.7 }
+            ];
+            parts.forEach(p => {
+                const m = new THREE.Mesh(sphereGeo, materials.cloudSoft);
+                m.position.set(p.x, p.y, p.z);
+                m.scale.setScalar(p.s);
+                cloudGroup.add(m);
+            });
+            cloudGroup.scale.setScalar(scale);
+            return cloudGroup;
+        }
+
+        // Hàm tạo ngôi sao 3D bo tròn nhỏ
+        function createCuteStar(size = 0.35) {
+            const starGroup = new THREE.Group();
+            const octa = new THREE.Mesh(new THREE.OctahedronGeometry(size, 0), materials.champagneGold);
+            octa.scale.set(1, 1.3, 0.6);
+            starGroup.add(octa);
+            return starGroup;
+        }
+
+        // ----------------------------------------------------------------------------
+        // TRẠM 0: BỨC THƯ TÌNH PASTEL & ĐẢO MÂY (INTRO)
+        // ----------------------------------------------------------------------------
+        const station0Group = new THREE.Group();
+        station0Group.position.copy(stationCoords[0]);
+        scene.add(station0Group);
+
+        // Đế đảo mây
+        const baseCloud0 = createFluffyCloud(1.65);
+        baseCloud0.position.set(0, -1.5, 0);
+        station0Group.add(baseCloud0);
+
+        // Nhóm Phong bì thư 3D nổi
+        const envelopeGroup = new THREE.Group();
+        envelopeGroup.position.set(0, 0.35, 0);
+        station0Group.add(envelopeGroup);
+        interactableRoots.push(envelopeGroup);
+
+        // Thân phong bì
+        const envBody = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.65, 0.22), materials.warmCream);
+        envBody.castShadow = true;
+        envelopeGroup.add(envBody);
+
+        // Viền hồng mặt sau/cạnh phong bì
+        const envBorder = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.75, 0.16), materials.blushClay);
+        envBorder.position.z = -0.04;
+        envelopeGroup.add(envBorder);
+
+        // Nắp phong bì hình tam giác
+        const flapShape = new THREE.Shape();
+        flapShape.moveTo(-1.25, 0.82);
+        flapShape.lineTo(1.25, 0.82);
+        flapShape.lineTo(0, -0.15);
+        flapShape.closePath();
+        const flapGeo = new THREE.ExtrudeGeometry(flapShape, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02 });
+        const envFlap = new THREE.Mesh(flapGeo, materials.blushClay);
+        envFlap.position.set(0, 0, 0.1);
+        envelopeGroup.add(envFlap);
+
+        // Con dấu sáp vàng Champagne ở giữa phong bì
+        const waxSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 28), materials.champagneGold);
+        waxSeal.rotation.x = Math.PI / 2;
+        waxSeal.position.set(0, -0.05, 0.16);
+        envelopeGroup.add(waxSeal);
+
+        // Các ngôi sao nhỏ bay quanh phong bì
+        const envStar1 = createCuteStar(0.28);
+        envStar1.position.set(-1.8, 1.1, 0.4);
+        station0Group.add(envStar1);
+
+        const envStar2 = createCuteStar(0.22);
+        envStar2.position.set(1.85, 0.8, -0.3);
+        station0Group.add(envStar2);
+
+        // ----------------------------------------------------------------------------
+        // TRẠM 1: BÔNG HOA NỞ RỘ & KHUNG KỶ NIỆM (THE LITTLE THINGS)
+        // ----------------------------------------------------------------------------
+        const station1Group = new THREE.Group();
+        station1Group.position.copy(stationCoords[1]);
+        scene.add(station1Group);
+
+        // Đảo tròn pastel
+        const island1 = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 1.7, 0.9, 32), materials.blushClay);
+        island1.position.set(0, -1.4, 0);
+        station1Group.add(island1);
+
+        const islandTop1 = new THREE.Mesh(new THREE.CylinderGeometry(2.45, 2.4, 0.25, 32), materials.warmCream);
+        islandTop1.position.set(0, -0.9, 0);
+        station1Group.add(islandTop1);
+
+        // Bông hoa 3D nghệ thuật ở trung tâm
+        const flowerGroup = new THREE.Group();
+        flowerGroup.position.set(0, 0.4, 0);
+        station1Group.add(flowerGroup);
+        interactableRoots.push(flowerGroup);
+
+        // Nhụy hoa vàng ấm
+        const flowerCenter = new THREE.Mesh(new THREE.SphereGeometry(0.55, 28, 28), materials.champagneGold);
+        flowerCenter.scale.set(1, 0.75, 1);
+        flowerGroup.add(flowerCenter);
+
+        // 8 Cánh hoa mềm mại xếp vòng tròn
+        const petalCount = 8;
+        for (let i = 0; i < petalCount; i++) {
+            const angle = (i / petalCount) * Math.PI * 2;
+            const petal = new THREE.Mesh(new THREE.SphereGeometry(0.52, 24, 24), i % 2 === 0 ? materials.rosePorcelain : materials.blushClay);
+            petal.scale.set(0.85, 0.35, 1.45);
+            petal.position.set(Math.cos(angle) * 0.95, 0, Math.sin(angle) * 0.95);
+            petal.rotation.y = -angle + Math.PI / 2;
+            petal.rotation.x = 0.22;
+            flowerGroup.add(petal);
+        }
+        flowerGroup.rotation.x = 0.45;
+        flowerGroup.rotation.z = -0.15;
+
+        // Các khung hình Polaroid 3D nhỏ bay lơ lửng xung quanh bông hoa
+        function createMiniPolaroid(colorHex) {
+            const polGroup = new THREE.Group();
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.35, 0.08), materials.warmCream);
+            const innerMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.3 });
+            const inner = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.88, 0.09), innerMat);
+            inner.position.y = 0.12;
+            polGroup.add(frame, inner);
+            return polGroup;
+        }
+
+        const pol1 = createMiniPolaroid(0xf6adc1);
+        pol1.position.set(-1.95, 0.8, 0.3);
+        pol1.rotation.set(0.1, 0.4, 0.15);
+        station1Group.add(pol1);
+
+        const pol2 = createMiniPolaroid(0xfad6a5);
+        pol2.position.set(1.95, 0.95, -0.2);
+        pol2.rotation.set(-0.1, -0.45, -0.12);
+        station1Group.add(pol2);
+
+        // ----------------------------------------------------------------------------
+        // TRẠM 2: HAI HÀNH TINH NHỎ & VÒNG QUỸ ĐẠO KẾT NỐI (THE HESITATION)
+        // ----------------------------------------------------------------------------
+        const station2Group = new THREE.Group();
+        station2Group.position.copy(stationCoords[2]);
+        scene.add(station2Group);
+
+        // Vòng quỹ đạo vàng Champagne tinh xảo
+        const orbitRingsGroup = new THREE.Group();
+        station2Group.add(orbitRingsGroup);
+        interactableRoots.push(orbitRingsGroup);
+
+        const mainRing = new THREE.Mesh(new THREE.TorusGeometry(2.15, 0.045, 20, 90), materials.champagneGold);
+        mainRing.rotation.x = Math.PI / 2.3;
+        orbitRingsGroup.add(mainRing);
+
+        const secondRing = new THREE.Mesh(new THREE.TorusGeometry(2.55, 0.025, 16, 90), materials.blushClay);
+        secondRing.rotation.x = -Math.PI / 3;
+        secondRing.rotation.y = Math.PI / 5;
+        orbitRingsGroup.add(secondRing);
+
+        // Hai quả cầu đại diện cho "Anh" và "Bích Hữu" tiến lại gần nhau khi nhấn giữ
+        const companionPivot = new THREE.Group();
+        station2Group.add(companionPivot);
+
+        const sphereHer = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 32), materials.rosePorcelain);
+        sphereHer.position.set(-1.35, 0.15, 0);
+        companionPivot.add(sphereHer);
+
+        // Vương miện nhỏ xinh trên quả cầu của Hữu
+        const tinyCrown = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.04, 12, 24), materials.champagneGold);
+        tinyCrown.rotation.x = Math.PI / 2;
+        tinyCrown.position.set(0, 0.58, 0);
+        sphereHer.add(tinyCrown);
+
+        const sphereHim = new THREE.Mesh(new THREE.SphereGeometry(0.58, 32, 32), materials.warmCream);
+        sphereHim.position.set(1.35, -0.15, 0);
+        companionPivot.add(sphereHim);
+
+        // Vòng đai nhỏ quanh quả cầu của Anh
+        const tinyBelt = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.035, 12, 32), materials.champagneGold);
+        tinyBelt.rotation.x = 1.1;
+        sphereHim.add(tinyBelt);
+
+        // ----------------------------------------------------------------------------
+        // TRẠM 3: TRÁI TIM PHA LÊ ROSE QUARTZ TRUNG TÂM (THE CONFESSION CLIMAX)
+        // ----------------------------------------------------------------------------
+        const station3Group = new THREE.Group();
+        station3Group.position.copy(stationCoords[3]);
+        scene.add(station3Group);
+
+        // Tạo hình học Trái Tim 3D mượt mà bằng Bezier + Extrude bevel tròn trịa
+        function createSculptedHeartMesh() {
+            const x = 0, y = 0;
+            const heartShape = new THREE.Shape();
+            heartShape.moveTo(x, y + 0.35);
+            heartShape.bezierCurveTo(x, y + 0.35, x - 0.15, y + 1.0, x - 0.85, y + 1.0);
+            heartShape.bezierCurveTo(x - 1.65, y + 1.0, x - 1.65, y + 0.05, x - 1.65, y + 0.05);
+            heartShape.bezierCurveTo(x - 1.65, y - 0.65, x - 0.95, y - 1.3, x, y - 1.9);
+            heartShape.bezierCurveTo(x + 0.95, y - 1.3, x + 1.65, y - 0.65, x + 1.65, y + 0.05);
+            heartShape.bezierCurveTo(x + 1.65, y + 0.05, x + 1.65, y + 1.0, x + 0.85, y + 1.0);
+            heartShape.bezierCurveTo(x + 0.15, y + 1.0, x, y + 0.35, x, y + 0.35);
+
+            const extrudeSettings = {
+                depth: 0.48,
+                bevelEnabled: true,
+                bevelSegments: 16,
+                steps: 2,
+                bevelSize: 0.38,
+                bevelThickness: 0.38
+            };
+
+            const geo = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+            geo.center();
+            const mesh = new THREE.Mesh(geo, materials.deepHeartCrystal);
+            mesh.scale.setScalar(0.92);
+            return mesh;
+        }
+
+        const centerpieceGroup = new THREE.Group();
+        centerpieceGroup.position.set(0, 0.45, 0);
+        station3Group.add(centerpieceGroup);
+        interactableRoots.push(centerpieceGroup);
+
+        const mainHeartMesh = createSculptedHeartMesh();
+        centerpieceGroup.add(mainHeartMesh);
+
+        // Vòng hào quang vàng Champagne ôm lấy trái tim
+        const heartHalo1 = new THREE.Mesh(new THREE.TorusGeometry(2.35, 0.038, 20, 100), materials.champagneGold);
+        heartHalo1.rotation.set(Math.PI / 2.8, 0.3, 0);
+        centerpieceGroup.add(heartHalo1);
+
+        const heartHalo2 = new THREE.Mesh(new THREE.TorusGeometry(2.75, 0.022, 16, 100), materials.warmCream);
+        heartHalo2.rotation.set(-Math.PI / 3.2, -0.4, 0);
+        centerpieceGroup.add(heartHalo2);
+
+        // Đế mây bồng bềnh dưới trái tim
+        const heartCloudBase = createFluffyCloud(1.85);
+        heartCloudBase.position.set(0, -2.15, 0);
+        station3Group.add(heartCloudBase);
+
+        // 24 Cánh hoa anh đào / hạt pha lê nhỏ bay vòng quanh trái tim
+        constfloatingPetalsGroup = new THREE.Group();
+        station3Group.add(constfloatingPetalsGroup);
+        const floatingPetals = [];
+        const petalGeo = new THREE.SphereGeometry(0.11, 12, 12);
+        petalGeo.scale(1, 0.3, 1.6);
+
+        for (let i = 0; i < 28; i++) {
+            const mat = i % 3 === 0 ? materials.champagneGold : (i % 2 === 0 ? materials.blushClay : materials.warmCream);
+            const petal = new THREE.Mesh(petalGeo, mat);
+            const radius = 2.4 + Math.random() * 2.2;
+            const angle = Math.random() * Math.PI * 2;
+            const height = (Math.random() - 0.5) * 3.5;
+            petal.position.set(Math.cos(angle) * radius, height, Math.sin(angle) * radius);
+            petal.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+            constfloatingPetalsGroup.add(petal);
+            floatingPetals.push({
+                mesh: petal,
+                radius,
+                angle,
+                speed: 0.004 + Math.random() * 0.006,
+                yOffset: Math.random() * Math.PI * 2
+            });
+        }
+
+        /**
+         * ============================================================================
+         * 4. HỆ THỐNG HẠT LẤP LÁNH & MÂY NỀN TOÀN CẢNH
+         * ============================================================================
+         */
+        // Tạo các đám mây nền xa xa để không gian có chiều sâu
+        const distantClouds = [];
+        const cloudPositions = [
+            [-9, 3, -8, 1.3], [9, -2, -5, 1.1], [10, 5, -18, 1.5],
+            [-6, -1, -22, 1.2], [-18, 2, -8, 1.4], [22, 4, -14, 1.3]
+        ];
+        cloudPositions.forEach(([cx, cy, cz, cs]) => {
+            const c = createFluffyCloud(cs);
+            c.position.set(cx, cy, cz);
+            scene.add(c);
+            distantClouds.push(c);
+        });
+
+        // Hạt bụi sao lấp lánh khắp bầu trời
+        const particleCount = 260;
+        const particleGeo = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 55;
+            posArray[i + 1] = (Math.random() - 0.5) * 30;
+            posArray[i + 2] = (Math.random() - 0.5) * 45 - 10;
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        // Tạo texture chấm tròn tỏa sáng mềm mại bằng Canvas 2D
+        function createSoftDotTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(32, 32, 2, 32, 32, 30);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            grad.addColorStop(0.4, 'rgba(255, 215, 230, 0.8)');
+            grad.addColorStop(1, 'rgba(255, 215, 230, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 64, 64);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.45,
+            map: createSoftDotTexture(),
+            transparent: true,
+            opacity: 0.85,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+        const starField = new THREE.Points(particleGeo, particleMat);
+        scene.add(starField);
+
+        /**
+         * ============================================================================
+         * 5. ĐIỀU KHIỂN CAMERA, RESPONSIVE MOBILE/PC & PARALLAX TƯƠNG TÁC
+         * ============================================================================
+         */
+        let currentStep = 0;
+        const cameraTarget = new THREE.Vector3();
+        const cameraBasePos = new THREE.Vector3();
+
+        // Tọa độ góc máy lý tưởng cho từng bước
+        function getWaypointCameraConfig(stepIndex) {
+            const isPortrait = window.innerHeight > window.innerWidth;
+            // Trên màn hình dọc điện thoại, lùi camera xa hơn một chút và hạ tâm nhìn xuống
+            // để vật thể 3D nổi bật ở nửa trên màn hình, không bị bảng chữ che khuất
+            const distZ = isPortrait ? 8.8 : 6.6;
+            const lookYOffset = isPortrait ? -0.95 : -0.55;
+            const camYOffset = isPortrait ? 0.5 : 0.7;
+
+            const targetStation = stationCoords[Math.min(stepIndex, 3)];
+            return {
+                camPos: new THREE.Vector3(
+                    targetStation.x,
+                    targetStation.y + camYOffset,
+                    targetStation.z + distZ
+                ),
+                lookAt: new THREE.Vector3(
+                    targetStation.x,
+                    targetStation.y + lookYOffset,
+                    targetStation.z
+                )
+            };
+        }
+
+        // Đặt vị trí camera ban đầu ở Bước 0
+        const initCam = getWaypointCameraConfig(0);
+        cameraBasePos.copy(initCam.camPos);
+        camera.position.copy(initCam.camPos);
+        cameraTarget.copy(initCam.lookAt);
+        camera.lookAt(cameraTarget);
+
+        // Biến lưu trữ độ lệch Parallax khi di chuột hoặc vuốt tay
+        const pointerParallax = { x: 0, y: 0, targetX: 0, targetY: 0 };
+        let isDragging = false;
+        let prevPointer = { x: 0, y: 0 };
+
+        // Raycaster để chạm vào vật thể 3D tạo hiệu ứng nảy dễ thương
+        const raycaster = new THREE.Raycaster();
+        const mouseVec = new THREE.Vector2();
+
+        function handlePointerDown(clientX, clientY) {
+            isDragging = true;
+            prevPointer.x = clientX;
+            prevPointer.y = clientY;
+
+            // Kiểm tra chạm vào vật thể 3D
+            mouseVec.x = (clientX / window.innerWidth) * 2 - 1;
+            mouseVec.y = -(clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouseVec, camera);
+
+            const intersects = raycaster.intersectObjects(interactableRoots, true);
+            if (intersects.length > 0) {
+                // Tìm nhóm gốc để tạo hiệu ứng đàn hồi
+                let obj = intersects[0].object;
+                while (obj.parent && !interactableRoots.includes(obj)) {
+                    obj = obj.parent;
+                }
+                if (obj) {
+                    soundBox.playSparkleSfx('soft');
+                    gsap.fromTo(obj.scale, 
+                        { x: 1.16, y: 1.16, z: 1.16 },
+                        { x: 1, y: 1, z: 1, duration: 0.75, ease: 'elastic.out(1.1, 0.4)' }
+                    );
+                }
+            }
+        }
+
+        function handlePointerMove(clientX, clientY) {
+            const normX = (clientX / window.innerWidth - 0.5) * 2;
+            const normY = (clientY / window.innerHeight - 0.5) * 2;
+
+            pointerParallax.targetX = normX * 0.65;
+            pointerParallax.targetY = -normY * 0.45;
+
+            if (isDragging) {
+                const dx = (clientX - prevPointer.x) * 0.008;
+                pointerParallax.targetX = Math.max(-1.2, Math.min(1.2, pointerParallax.targetX + dx));
+                prevPointer.x = clientX;
+                prevPointer.y = clientY;
+            }
+        }
+
+        container.addEventListener('mousedown', e => handlePointerDown(e.clientX, e.clientY));
+        window.addEventListener('mousemove', e => handlePointerMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        container.addEventListener('touchstart', e => {
+            if (e.touches.length > 0) {
+                handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', e => {
+            if (e.touches.length > 0) {
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => { isDragging = false; });
+
+        /**
+         * ============================================================================
+         * 6. LOGIC DẪN DẮT CÂU CHUYỆN & CHUYỂN CẢNH GSAP
+         * ============================================================================
+         */
+        const chapterTitles = [
+            'Chương 01 · Lời chào dịu dàng',
+            'Chương 02 · Điều nhỏ bé rạng rỡ',
+            'Chương 03 · Nhịp đập đồng điệu',
+            'Chương Cuối · Gửi Ngô Bích Hữu 💗',
+            'Kỷ Niệm Ngọt Ngào · Anh & Bích Hữu ✨'
+        ];
+
+        const hintMessages = [
+            'Chạm vào bức thư 3D hoặc xoay nhẹ không gian ✨',
+            'Chạm vào bông hoa pastel để xem hiệu ứng nở rộ 🌸',
+            'Nhấn giữ nút trái tim để đưa hai vì sao lại gần nhau 💫',
+            'Trái tim pha lê dành riêng cho Ngô Bích Hữu 💗',
+            'Chạm vào trái tim để tung thêm cánh hoa chúc mừng ✨'
+        ];
+
+        function goToStep(nextStep) {
+            soundBox.playSparkleSfx('soft');
+
+            // Tự động bật nhạc nhẹ ở lần tương tác đầu tiên nếu chưa bật
+            if (currentStep === 0 && nextStep === 1 && !soundBox.isPlaying) {
+                soundBox.toggleBackgroundMusic();
+            }
+
+            currentStep = nextStep;
+
+            // Cập nhật tiêu đề chương và gợi ý
+            document.getElementById('chapter-badge').textContent = chapterTitles[nextStep];
+            document.getElementById('hint-text').textContent = hintMessages[nextStep];
+
+            // Cập nhật thanh chấm tiến trình
+            document.querySelectorAll('.step-dot').forEach((dot, idx) => {
+                if (idx === Math.min(nextStep, 3)) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+
+            // Ẩn/Hiện nội dung thẻ chữ với hiệu ứng mượt
+            const card = document.getElementById('story-card');
+            gsap.to(card, {
+                opacity: 0,
+                y: 12,
+                duration: 0.25,
+                ease: 'power2.in',
+                onComplete: () => {
+                    document.querySelectorAll('.step-pane').forEach((pane, idx) => {
+                        if (idx === nextStep) {
+                            pane.classList.remove('hidden');
+                            pane.classList.add('flex');
+                        } else {
+                            pane.classList.add('hidden');
+                            pane.classList.remove('flex');
+                        }
+                    });
+
+                    // Nếu quay lại Bước 2 thì đặt lại tiến trình nhấn giữ
+                    if (nextStep === 2) {
+                        resetHoldUnlock();
+                    }
+
+                    gsap.to(card, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.45,
+                        ease: 'power3.out'
+                    });
+                }
+            });
+
+            // Di chuyển Camera 3D mượt mà tới trạm tiếp theo
+            const camConfig = getWaypointCameraConfig(nextStep);
+            gsap.to(cameraBasePos, {
+                x: camConfig.camPos.x,
+                y: camConfig.camPos.y,
+                z: camConfig.camPos.z,
+                duration: 1.8,
+                ease: 'power3.inOut'
+            });
+
+            gsap.to(cameraTarget, {
+                x: camConfig.lookAt.x,
+                y: camConfig.lookAt.y,
+                z: camConfig.lookAt.z,
+                duration: 1.8,
+                ease: 'power3.inOut'
+            });
+
+            // Di chuyển nguồn sáng hồng ấm đi theo trạm hiện tại
+            const targetStation = stationCoords[Math.min(nextStep, 3)];
+            gsap.to(pointLightRose.position, {
+                x: targetStation.x,
+                y: targetStation.y + 3,
+                z: targetStation.z + 3,
+                duration: 1.8
+            });
+        }
+
+        /**
+         * ============================================================================
+         * 7. TƯƠNG TÁC NHẤN & GIỮ Ở BƯỚC 3 (KẾT NỐI HAI QUỸ ĐẠO)
+         * ============================================================================
+         */
+        let holdProgress = 0;
+        let isHoldingBtn = false;
+        let holdCompleted = false;
+        const holdRing = document.getElementById('hold-progress-ring');
+        const holdStatusText = document.getElementById('hold-status-text');
+        const holdBtn = document.getElementById('hold-unlock-btn');
+        const ringCircumference = 213.6;
+
+        function resetHoldUnlock() {
+            holdProgress = 0;
+            holdCompleted = false;
+            isHoldingBtn = false;
+            updateHoldVisuals();
+        }
+
+        function updateHoldVisuals() {
+            const offset = ringCircumference - (holdProgress / 100) * ringCircumference;
+            holdRing.style.strokeDashoffset = offset;
+            holdStatusText.textContent = holdCompleted
+                ? 'Đã kết nối trọn vẹn 100% ✨'
+                : `Đang gửi nhịp đập... (${Math.round(holdProgress)}%)`;
+
+            // Di chuyển 2 quả cầu 3D tiến sát lại gần nhau theo tiến độ
+            const dist = 1.35 * (1 - (holdProgress / 100) * 0.65);
+            sphereHer.position.x = -dist;
+            sphereHim.position.x = dist;
+        }
+
+        function startHold(e) {
+            if (e.cancelable) e.preventDefault();
+            if (holdCompleted) return;
+            isHoldingBtn = true;
+            // Cộng thêm một chút mỗi lần chạm để hỗ trợ cả người dùng chạm nhấp liên tục
+            holdProgress = Math.min(100, holdProgress + 14);
+            soundBox.playChime(523.25 + holdProgress * 4, 0.5, 0.035);
+            updateHoldVisuals();
+        }
+
+        function endHold() {
+            isHoldingBtn = false;
+        }
+
+        holdBtn.addEventListener('mousedown', startHold);
+        holdBtn.addEventListener('touchstart', startHold, { passive: false });
+        window.addEventListener('mouseup', endHold);
+        window.addEventListener('touchend', endHold);
+
+        /**
+         * ============================================================================
+         * 8. NÚT "ĐỂ SUY NGHĨ THÊM..." NHÍ NHẢNH & NÚT "EM ĐỒNG Ý 💗"
+         * ============================================================================
+         */
+        const shyBtn = document.getElementById('btn-shy-dodge');
+        const acceptBtn = document.getElementById('btn-accept-love');
+        let shyClickCount = 0;
+        const cutePersuasions = [
+            'Đừng suy nghĩ lâu quá nha 🥺',
+            'Bấm nút bên cạnh đi mà ✨',
+            'Nút hồng bên trái xinh hơn đó 💗',
+            'Anh đợi câu đồng ý của Hữu nè 🌸',
+            'Chốt đồng ý luôn nha! 🌷'
+        ];
+
+        function dodgeShyButton(e) {
+            if (e && e.cancelable) e.preventDefault();
+            soundBox.playSparkleSfx('dodge');
+
+            shyBtn.textContent = cutePersuasions[shyClickCount % cutePersuasions.length];
+            shyClickCount++;
+
+            // Dịch chuyển nhẹ nhàng trong phạm vi an toàn và làm nút "Em đồng ý" lớn dần lên một chút
+            const randX = (Math.random() - 0.5) * 70;
+            const randY = (Math.random() - 0.5) * 28;
+            gsap.to(shyBtn, {
+                x: randX,
+                y: randY,
+                scale: Math.max(0.82, 1 - shyClickCount * 0.04),
+                duration: 0.3,
+                ease: 'back.out(2)'
+            });
+
+            gsap.to(acceptBtn, {
+                scale: Math.min(1.16, 1 + shyClickCount * 0.04),
+                duration: 0.35,
+                ease: 'back.out(2)'
+            });
+        }
+
+        shyBtn.addEventListener('mouseenter', dodgeShyButton);
+        shyBtn.addEventListener('touchstart', dodgeShyButton, { passive: false });
+        shyBtn.addEventListener('click', dodgeShyButton);
+
+        // Khi Ngô Bích Hữu nhấn "Em đồng ý 💗"
+        function acceptConfession() {
+            soundBox.playSparkleSfx('celebrate');
+            triggerHeartBurst();
+            goToStep(4);
+        }
+
+        // Hiệu ứng bùng nổ hạt sáng & xoay trái tim 3D rạng rỡ
+        function triggerHeartBurst() {
+            soundBox.playSparkleSfx('celebrate');
+
+            // Trái tim phóng nhẹ và xoay 1 vòng đầy hạnh phúc
+            gsap.fromTo(centerpieceGroup.scale,
+                { x: 1.32, y: 1.32, z: 1.32 },
+                { x: 1, y: 1, z: 1, duration: 1.2, ease: 'elastic.out(1.1, 0.4)' }
+            );
+            gsap.to(mainHeartMesh.rotation, {
+                y: mainHeartMesh.rotation.y + Math.PI * 2,
+                duration: 1.6,
+                ease: 'power3.out'
+            });
+
+            // Mở rộng các cánh hoa xung quanh rồi thu nhẹ lại
+            floatingPetals.forEach(p => {
+                gsap.fromTo(p.mesh.scale,
+                    { x: 2.0, y: 2.0, z: 2.0 },
+                    { x: 1.0, y: 1.0, z: 1.0, duration: 1.4, ease: 'power2.out' }
+                );
+            });
+        }
+
+        // Chế độ ẩn tạm hộp thoại để ngắm trọn vẹn không gian 3D
+        let isUIMinimized = false;
+        function toggleMinimizedUI() {
+            isUIMinimized = !isUIMinimized;
+            const card = document.getElementById('story-card');
+            const restoreBtn = document.getElementById('restore-ui-btn');
+
+            if (isUIMinimized) {
+                card.classList.add('hidden');
+                restoreBtn.classList.remove('hidden');
+                restoreBtn.classList.add('flex');
+            } else {
+                card.classList.remove('hidden');
+                restoreBtn.classList.add('hidden');
+                restoreBtn.classList.remove('flex');
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 9. VÒNG LẶP ANIMATION 3D (60FPS MƯỢT MÀ)
+         * ============================================================================
+         */
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = clock.getElapsedTime();
+
+            // 1. Chuyển động lơ lửng của Trạm 0 (Phong bì thư)
+            envelopeGroup.position.y = 0.35 + Math.sin(elapsed * 1.8) * 0.16;
+            envelopeGroup.rotation.y = Math.sin(elapsed * 0.9) * 0.22;
+            envelopeGroup.rotation.z = Math.cos(elapsed * 1.1) * 0.05;
+            envStar1.rotation.y = elapsed * 1.2;
+            envStar2.rotation.y = -elapsed * 1.4;
+
+            // 2. Chuyển động của Trạm 1 (Bông hoa & Khung ảnh kỷ niệm)
+            flowerGroup.rotation.y = Math.sin(elapsed * 0.7) * 0.25;
+            flowerGroup.position.y = 0.4 + Math.cos(elapsed * 1.6) * 0.12;
+            pol1.position.y = 0.8 + Math.sin(elapsed * 2.0) * 0.12;
+            pol2.position.y = 0.95 + Math.cos(elapsed * 1.8) * 0.12;
+
+            // 3. Chuyển động của Trạm 2 (Hai vì sao xoay quanh nhau)
+            const orbitSpeed = currentStep === 2 && isHoldingBtn ? 3.5 : 0.9;
+            companionPivot.rotation.y += 0.012 * orbitSpeed;
+            mainRing.rotation.z = elapsed * 0.25;
+            secondRing.rotation.z = -elapsed * 0.2;
+
+            // Xử lý thanh nhấn giữ ở Bước 2
+            if (currentStep === 2 && !holdCompleted) {
+                if (isHoldingBtn) {
+                    holdProgress = Math.min(100, holdProgress + 0.95);
+                    updateHoldVisuals();
+                } else if (holdProgress > 0) {
+                    holdProgress = Math.max(0, holdProgress - 0.25);
+                    updateHoldVisuals();
+                }
+
+                if (holdProgress >= 100 && !holdCompleted) {
+                    holdCompleted = true;
+                    updateHoldVisuals();
+                    soundBox.playSparkleSfx('celebrate');
+                    setTimeout(() => {
+                        goToStep(3);
+                    }, 550);
+                }
+            }
+
+            // 4. Chuyển động của Trạm 3 & 4 (Trái tim pha lê trung tâm)
+            const heartBeat = 1 + Math.sin(elapsed * 3.2) * 0.045;
+            mainHeartMesh.scale.setScalar(0.92 * heartBeat);
+            mainHeartMesh.rotation.y = Math.sin(elapsed * 0.8) * 0.35;
+            centerpieceGroup.position.y = 0.45 + Math.sin(elapsed * 1.5) * 0.15;
+
+            heartHalo1.rotation.z = elapsed * 0.35;
+            heartHalo2.rotation.y = -elapsed * 0.28;
+
+            // Các cánh hoa bay quanh trái tim
+            floatingPetals.forEach(p => {
+                p.angle += p.speed;
+                p.mesh.position.x = Math.cos(p.angle) * p.radius;
+                p.mesh.position.z = Math.sin(p.angle) * p.radius;
+                p.mesh.position.y += Math.sin(elapsed * 2 + p.yOffset) * 0.004;
+                p.mesh.rotation.x += 0.01;
+                p.mesh.rotation.y += 0.015;
+            });
+
+            // 5. Chuyển động hạt sao & mây nền
+            starField.rotation.y = elapsed * 0.018;
+            distantClouds.forEach((c, idx) => {
+                c.position.y += Math.sin(elapsed * 0.8 + idx) * 0.0015;
+            });
+
+            // 6. Áp dụng Parallax mượt mà cho Camera
+            pointerParallax.x += (pointerParallax.targetX - pointerParallax.x) * 0.06;
+            pointerParallax.y += (pointerParallax.targetY - pointerParallax.y) * 0.06;
+
+            camera.position.x = cameraBasePos.x + pointerParallax.x;
+            camera.position.y = cameraBasePos.y + pointerParallax.y;
+            camera.position.z = cameraBasePos.z;
+            camera.lookAt(cameraTarget);
+
+            renderer.render(scene, camera);
+        }
+
+        // Tự động điều chỉnh kích thước và tỷ lệ khung hình trên cả Mobile & PC
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const updatedCam = getWaypointCameraConfig(currentStep);
+            cameraBasePos.copy(updatedCam.camPos);
+            cameraTarget.copy(updatedCam.lookAt);
+        });
+
+        window.onload = function () {
+            animate();
+        };
+    </script>
+</body>
+</html>
